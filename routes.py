@@ -202,6 +202,18 @@ async def proxy_with_httpx(
 
 
 @router.get("/health")
-async def health_check():
-    """Health check endpoint."""
-    return {"status": "ok"}
+async def health_check(request: Request):
+    """Extended health check with dependency verification."""
+    health_status = {"status": "ok", "request_id": request.state.request_id}
+    
+    try:
+        # Verify upstream API connectivity
+        client = request.app.state.http_client
+        health_resp = await client.head(f"{config['openrouter']['base_url']}/health")
+        health_status["openrouter_status"] = "up" if health_resp.status_code < 500 else "down"
+    except Exception as e:
+        health_status["openrouter_status"] = "down"
+        health_status["openrouter_error"] = str(e)
+        logger.error("OpenRouter connection check failed", extra={"error": str(e)})
+    
+    return health_status
