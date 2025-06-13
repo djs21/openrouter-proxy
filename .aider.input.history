@@ -186,3 +186,99 @@
 
 # 2025-06-13 12:03:26.455921
 +/code
+
+# 2025-06-13 12:06:01.316754
++n
+
+# 2025-06-13 12:07:19.218985
++/read-only conventions.md
+
+# 2025-06-13 12:08:18.121872
++/ask another error read it on coventions.md
+
+# 2025-06-13 12:09:25.560443
++/ask i don't have cargo.toml on my virtual environtment
+
+# 2025-06-13 12:10:52.750247
++/ask change all the rust requirements into non rust dependencies
+
+# 2025-06-13 12:42:35.501282
++/ask what is `pydantic` used for?
+
+# 2025-06-13 12:44:17.395256
++/add README.md
+
+# 2025-06-13 12:44:22.483069
++/add confi
+
+# 2025-06-13 12:44:30.498605
++n
+
+# 2025-06-13 12:44:35.586900
++/add config.yml.example
+
+# 2025-06-13 12:45:04.370272
++do it and then please update all to the recent 
+
+# 2025-06-13 12:46:23.402592
++/run rm -rf venv
+
+# 2025-06-13 12:46:23.402636
++/run rm -rf venv
+
+# 2025-06-13 12:46:23.530132
++/run python -m venv venv
+
+# 2025-06-13 12:46:23.530185
++/run python -m venv venv
+
+# 2025-06-13 12:46:26.048780
++/run source venv/bin/activate
+
+# 2025-06-13 12:46:26.048826
++/run source venv/bin/activate
+
+# 2025-06-13 12:46:26.175976
++/run pip install -r requirements.txt
+
+# 2025-06-13 12:46:26.176022
++/run pip install -r requirements.txt
+
+# 2025-06-13 12:49:25.820853
++update config.yml.example and README.md, and config.yml agar sesuai dengan perubahan terakhir
+
+# 2025-06-13 12:53:48.625468
++/run sudo ./service_install_venv.sh
+
+# 2025-06-13 12:53:48.625511
++/run sudo ./service_install_venv.sh
+
+# 2025-06-13 12:54:01.782920
++n
+
+# 2025-06-13 12:54:19.278833
++git commit and push to my github
+
+# 2025-06-13 13:07:01.463610
++/ask apakah semua sudah diaplikasikan? jika sudah apakah sudah di push ke github saya? jika sudah quit dari aider
+
+# 2025-06-13 13:07:45.790757
++git push origin main 
+
+# 2025-06-13 13:08:18.949850
++n
+
+# 2025-06-13 13:08:22.589732
++y
+
+# 2025-06-13 13:08:22.592173
++/run git push origin main
+
+# 2025-06-13 13:08:22.592201
++/run git push origin main
+
+# 2025-06-13 13:08:28.237698
++n
+
+# 2025-06-13 13:08:37.797710
++/qu
