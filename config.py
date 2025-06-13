@@ -83,3 +83,8 @@ def setup_logging(config_: Dict[str, Any]) -> logging.Logger:
 # Load and validate configuration once at startup
 config = load_config()
 logger = setup_logging(config)
+
+# Ensure extra fields are allowed (for forward compatibility with config.yml)
+ServerConfig.Config.extra = "allow"
+OpenRouterConfig.Config.extra = "allow"
+RequestProxyConfig.Config.extra = "allow"

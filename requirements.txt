@@ -1,9 +1,10 @@
-fastapi~=0.111.0
+# Updated to remove Rust dependencies while maintaining functionality
+fastapi~=0.109.0  # Last version compatible with Pydantic v1
 uvicorn~=0.27.0
 pyyaml~=6.0.1
 httpx[socks]~=0.25.0
-brotlipy~=0.7.0  # Pure Python alternative to brotlicffi
+brotlipy~=0.7.0
 cachetools~=5.3.1
 prometheus-client~=0.20.0
-pydantic~=2.7.0
+pydantic~=1.10.14  # Pure Python implementation
 python-dotenv~=1.0.0
