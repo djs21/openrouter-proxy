@@ -5,13 +5,15 @@ by rotating through multiple API keys in a round-robin fashion.
 
 ## Features
 
-- Proxies all requests to OpenRouter API v1
-- Rotates multiple API keys to bypass rate limits
-- Automatically disables API keys temporarily when rate limits are reached
-- Streams responses chunk by chunk for efficient data transfer
-- Simple authentication for accessing the proxy
-- Uses OpenAI SDK for compatible endpoints for reliable handling
-- Theoretically compatible with any OpenAI-compatible API by changing the `base_url` and `public_endpoints` in `config.yml`
+- **HTTP Compliance**: Full HTTP/1.1 spec compliance with proper chunked encoding
+- **Performance Monitoring**: Response metrics via Prometheus at `/metrics`
+- **Request Tracing**: Unique request IDs for end-to-end logging (X-Request-ID)
+- **Health Checks**: Extended endpoint monitoring with `/health` endpoint
+- **Key Validation**: Strict API key format enforcement ("sk-or-" prefix)
+- **Response Caching**: Built-in caching for /models endpoint with TTL control
+- **Streaming Support**: Optimized streaming responses with HTTP/1.1 compliance
+- **Environment Support**: API keys can be set via OPENROUTER_KEYS environment variable
+- **Production Ready**: Structured logging, performance tracking headers, and graceful shutdown
 
 ## Setup
 
@@ -30,7 +32,55 @@ by rotating through multiple API keys in a round-robin fashion.
 
 ## Configuration
 
-The `config.yml` file supports the following settings:
+The `config.yml` file supports these settings with new production-ready options:
+
+```yaml
+# Server settings
+server:
+  host: "0.0.0.0"  # Interface to bind to
+  port: 5555       # Port to listen on
+  access_key: "your_local_access_key_here"  # Authentication key
+  log_level: "INFO"  # Logging level
+  http_log_level: "INFO"  # HTTP access logs level
+
+# OpenRouter API settings
+openrouter:
+  keys:
+    - "sk-or-v1-example-api-key-1" # Keys must start with 'sk-or-'
+    - "sk-or-v1-example-api-key-2"
+
+  # Can also set via env: OPENROUTER_KEYS=key1,key2
+
+  # Cache settings for free models endpoint
+  enable_cache: true  # Enable response caching
+  cache_ttl: 300     # Cache lifetime in seconds (5 minutes)
+
+  # Key selection strategy: "round-robin" (default), "first" or "random".
+  key_selection_strategy: "round-robin"
+  # List of key selection options:
+  #   "same": Always use the last used key as long as it is possible.
+  key_selection_opts: []
+
+  # OpenRouter API base URL
+  base_url: "https://openrouter.ai/api/v1"
+
+  # Public endpoints that don't require authentication
+  public_endpoints:
+    - "/api/v1/models"
+
+  # Time in seconds to temporarily disable a key when rate limit is reached by default
+  rate_limit_cooldown: 14400  # 4 hours
+  free_only: false # try to show only free models
+  # Google sometimes returns 429 RESOURCE_EXHAUSTED errors repeatedly, which can cause Roo Code to stop.
+  # This prevents repeated failures by introducing a delay before retrying.
+  # google_rate_delay: 10 # in sec
+  google_rate_delay: 0
+
+# Proxy settings for outgoing requests to OpenRouter
+requestProxy:
+  enabled: false  # Set to true to enable proxy
+  url: "socks5://username:password@example.com:1080"  # Proxy URL with optional credentials embedded
+```
 
 ```yaml
 # Server settings
