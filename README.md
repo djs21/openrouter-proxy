@@ -94,38 +94,34 @@ server:
   log_level: "INFO"  # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
   http_log_level: "INFO"  # HTTP access logs level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
-# OpenRouter API keys
+# OpenRouter API settings
 openrouter:
   keys:
     - "sk-or-v1-your-first-api-key"
     - "sk-or-v1-your-second-api-key"
     - "sk-or-v1-your-third-api-key"
 
+  # Cache settings for free models endpoint
+  enable_cache: true  # Enable response caching
+  cache_ttl: 300     # Cache lifetime in seconds (5 minutes)
+
+  base_url: "https://openrouter.ai/api/v1"  # OpenRouter API endpoint
+  public_endpoints: ["/api/v1/models"]  # No auth required
+
   # Key selection strategy: "round-robin" (default), "first" or "random".
   key_selection_strategy: "round-robin"
-  # List of key selection options:
-  #   "same": Always use the last used key as long as it is possible.
+  # Options: ["same"] to prefer last used key
   key_selection_opts: []
 
-  # OpenRouter API base URL
-  base_url: "https://openrouter.ai/api/v1"
-
-  # Public endpoints that don't require authentication
-  public_endpoints:
-    - "/api/v1/models"
-
-  # Time in seconds to temporarily disable a key when rate limit is reached by default
+  # When keys get rate limited
   rate_limit_cooldown: 14400  # 4 hours
-  free_only: false # try to show only free models
-  # Google sometimes returns 429 RESOURCE_EXHAUSTED errors repeatedly, which can cause Roo Code to stop.
-  # This prevents repeated failures by introducing a delay before retrying.
-  # google_rate_delay: 10 # in sec
-  google_rate_delay: 0
+  free_only: false  # Only show free models
+  google_rate_delay: 0  # Delay for Google API issues
 
-# Proxy settings for outgoing requests to OpenRouter
+# Outgoing proxy configuration
 requestProxy:
-  enabled: false    # Set to true to enable proxy
-  url: "socks5://username:password@example.com:1080"  # Proxy URL with optional credentials embedded
+  enabled: false  # Enable to use proxy
+  url: "socks5://user:pass@proxy.com:1080"  # Proxy URL with credentials
 ```
 
 ## Usage
