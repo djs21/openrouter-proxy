@@ -17,15 +17,12 @@ from constants import RATE_LIMIT_ERROR_CODE
 def get_local_ip() -> str:
     """Get local IP address for displaying in logs."""
     try:
-        # Create a socket that connects to a public address
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # No actual connection is made
-        s.connect(("8.8.8.8", 80))
-        local_ip = s.getsockname()[0]
-        s.close()
-        return local_ip
-    except Exception:
-        return "localhost"
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+    except Exception as e:
+        logger.error("Failed to get local IP, using fallback", extra={"error": str(e)})
+        return "127.0.0.1"
 
 
 async def verify_access_key(
