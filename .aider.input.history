@@ -157,3 +157,32 @@
 
 # 2025-06-13 11:37:07.511986
 +/code
+
+# 2025-06-13 11:46:30.396334
++n
+
+# 2025-06-13 11:48:25.425962
++/ask terdapat error   error: subprocess-exited-with-error
++
++  × Preparing metadata (pyproject.toml) did not run successfully.
++  │ exit code: 1
++  ╰─> [7 lines of output]
++      Error: `--format-version` is not expected in this context
++      💥 maturin failed
++        Caused by: Cargo metadata failed. Does your crate compile with `cargo build`?
++        Caused by: `cargo metadata` exited with `, do i need cargo/rust package to build this now?
+
+# 2025-06-13 11:49:47.192344
++/ask
+
+# 2025-06-13 11:50:33.063381
++now scan all of the code, i don't want to have cargo inside my python code, what you propose to me?
+
+# 2025-06-13 11:59:45.788392
++/code do it
+
+# 2025-06-13 12:03:10.111846
++n
+
+# 2025-06-13 12:03:26.455921
++/code
