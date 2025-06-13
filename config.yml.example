@@ -4,6 +4,8 @@
 server:
   host: "0.0.0.0"  # Bind to all interfaces
   port: 5555        # Listen port
+  
+  # IMPORTANT: Use a strong access key - this protects your proxy
   access_key: "your_local_access_key_here"  # Auth for proxy access
   log_level: "INFO"  # App log level (DEBUG, INFO, WARNING, ERROR)
   http_log_level: "INFO"  # HTTP logs level
