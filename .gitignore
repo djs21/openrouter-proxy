@@ -5,6 +5,8 @@ config.yml
 venv/
 env/
 .env
+.nenv
+conventions.md
 
 # Python bytecode
 __pycache__/
@@ -29,3 +31,4 @@ build/
 .DS_Store
 
 .git/
+.aider*
