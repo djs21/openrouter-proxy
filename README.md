@@ -82,7 +82,7 @@ openrouter:
 # Proxy settings for outgoing requests to OpenRouter
 requestProxy:
   enabled: false  # Set to true to enable proxy
-  url: "socks5://username:password@example.com:1080"  # Proxy URL with optional credentials embedded
+  url: "socks5://user:pass@proxy.com:1080"  # Proxy URL with credentials
 ```
 
 ```yaml
