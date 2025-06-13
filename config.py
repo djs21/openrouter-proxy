@@ -89,6 +89,3 @@ ServerConfig.Config.extra = "allow"
 OpenRouterConfig.Config.extra = "allow"
 RequestProxyConfig.Config.extra = "allow"
 
-# Clear the config after any previous runs
-config = None
-logger = None

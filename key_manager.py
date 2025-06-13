@@ -127,4 +127,4 @@ class KeyManager:
 
             self.disabled_until[key] = disabled_until
             logger.warning(
-    "API key %s has been disabled until %s.", mask_key(key), disabled_until)
+                "API key %s has been disabled until %s.", mask_key(key), disabled_until)
