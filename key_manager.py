@@ -13,6 +13,7 @@ from typing import Dict, List, Optional
 from fastapi import HTTPException
 
 from config import logger
+from main import ACTIVE_KEYS, COOLDOWN_KEYS
 
 
 def mask_key(key: str) -> str:
@@ -39,6 +40,15 @@ class KeyManager:
         if not keys:
             logger.error("No API keys provided in configuration.")
             sys.exit(1)
+        self.update_metrics()
+
+    def update_metrics(self):
+        """Update Prometheus metrics for keys"""
+        now_ = datetime.now()
+        active_keys = [k for k in self.keys if k not in self.disabled_until or self.disabled_until[k] <= now_]
+        cooldown_keys = [k for k in self.keys if k in self.disabled_until and self.disabled_until[k] > now_]
+        ACTIVE_KEYS.set(len(active_keys))
+        COOLDOWN_KEYS.set(len(cooldown_keys))
 
     async def get_next_key(self) -> str:
         """Get the next available API key using round-robin selection."""
@@ -86,6 +96,7 @@ class KeyManager:
             else:
                 raise RuntimeError(f"Unknown key selection strategy: {self.strategy}")
             self.last_key = selected_key
+            self.update_metrics()
             return selected_key
 
     async def disable_key(self, key: str, reset_time_ms: Optional[int] = None):
@@ -126,5 +137,6 @@ class KeyManager:
 "No reset time provided, using default cooldown of %s seconds", self.cooldown_seconds)
 
             self.disabled_until[key] = disabled_until
+            self.update_metrics()
             logger.warning(
                 "API key %s has been disabled until %s.", mask_key(key), disabled_until)

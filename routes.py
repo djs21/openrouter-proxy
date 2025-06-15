@@ -15,6 +15,7 @@ from config import config, logger
 from constants import MODELS_ENDPOINTS
 from key_manager import KeyManager, mask_key
 from utils import verify_access_key, check_rate_limit
+from main import TOKENS_SENT, TOKENS_RECEIVED
 
 # Create router
 router = APIRouter()
@@ -116,6 +117,19 @@ async def proxy_endpoint(
     return await proxy_with_httpx(request, path, api_key, is_stream)
 
 
+def get_request_body_tokens(request_body: dict) -> int:
+    """Estimate tokens based on messages content and max tokens"""
+    tokens = request_body.get("max_tokens", 0)
+    messages = request_body.get("messages", [])
+    for message in messages:
+        content = message.get("content", "")
+        if isinstance(content, str):
+            tokens += len(content) // 4  # Rough token estimate
+        elif isinstance(content, list):
+            tokens += sum(len(item.get("text", "")) // 4 for item in content if item.get("type") == "text")
+    return tokens
+
+
 async def proxy_with_httpx(
     request: Request,
     path: str,
@@ -134,6 +148,16 @@ async def proxy_with_httpx(
     }
     if api_key:
         req_kwargs["headers"]["Authorization"] = f"Bearer {api_key}"
+
+    # Count request tokens if POST
+    if request.method == "POST":
+        try:
+            request_body = await request.json()
+            request_tokens = get_request_body_tokens(request_body)
+            if request_tokens > 0:
+                TOKENS_SENT.inc(request_tokens)
+        except json.JSONDecodeError:
+            pass
 
     client = await get_async_client(request)
     try:
@@ -159,6 +183,15 @@ async def proxy_with_httpx(
             await check_httpx_err(body, api_key)
             if free_only:
                 body = remove_paid_models(body)
+            # Count tokens from non-streaming response
+            try:
+                resp_data = json.loads(body)
+                if "usage" in resp_data:
+                    usage = resp_data["usage"]
+                    TOKENS_RECEIVED.inc(usage.get("completion_tokens", 0))
+            except json.JSONDecodeError:
+                pass
+
             return Response(
                 content=body,
                 status_code=openrouter_resp.status_code,
@@ -177,6 +210,15 @@ async def proxy_with_httpx(
                 logger.error("sse_stream error: %s", err)
             finally:
                 await openrouter_resp.aclose()
+            # Extract tokens from last event and update metrics
+            if last_json:
+                try:
+                    data = json.loads(last_json)
+                    if "usage" in data:
+                        usage = data["usage"]
+                        TOKENS_RECEIVED.inc(usage.get("completion_tokens", 0))
+                except json.JSONDecodeError:
+                    pass
             await check_httpx_err(last_json, api_key)
 
 
