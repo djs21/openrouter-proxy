@@ -1,5 +1,5 @@
 #aider file
-.aider*
+.aider.*
 # Configuration file
 config.yml
 
