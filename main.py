@@ -17,20 +17,13 @@ except ImportError:
     psutil = None
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, Response
-from prometheus_client import Gauge, Counter, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from config import config, logger
 from routes import router, lifespan
 from utils import get_local_ip
-
-# ===== Define custom Prometheus metrics =====
-TOKENS_SENT = Counter('openrouter_tokens_sent_total', 'Total tokens sent to OpenRouter')
-TOKENS_RECEIVED = Counter('openrouter_tokens_received_total', 'Total tokens received from OpenRouter')
-ACTIVE_KEYS = Gauge('openrouter_active_keys', 'Number of active API keys')
-COOLDOWN_KEYS = Gauge('openrouter_keys_in_cooldown', 'Number of keys in cooldown')
-CPU_USAGE = Gauge('system_cpu_usage_percent', 'Current CPU usage percentage')
-MEMORY_USAGE = Gauge('system_memory_usage_percent', 'Current memory usage percentage')
+from metrics import TOKENS_SENT, TOKENS_RECEIVED, ACTIVE_KEYS, COOLDOWN_KEYS, CPU_USAGE, MEMORY_USAGE
 
 app = FastAPI(
     title="OpenRouter API Proxy",

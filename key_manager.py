@@ -13,7 +13,7 @@ from typing import Dict, List, Optional
 from fastapi import HTTPException
 
 from config import logger
-from main import ACTIVE_KEYS, COOLDOWN_KEYS
+from metrics import ACTIVE_KEYS, COOLDOWN_KEYS
 
 
 def mask_key(key: str) -> str:

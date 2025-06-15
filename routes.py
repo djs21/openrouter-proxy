@@ -15,7 +15,7 @@ from config import config, logger
 from constants import MODELS_ENDPOINTS
 from key_manager import KeyManager, mask_key
 from utils import verify_access_key, check_rate_limit
-from main import TOKENS_SENT, TOKENS_RECEIVED
+from metrics import TOKENS_SENT, TOKENS_RECEIVED
 
 # Create router
 router = APIRouter()
