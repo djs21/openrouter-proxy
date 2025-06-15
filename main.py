@@ -8,7 +8,13 @@ import uuid
 import time
 import uvicorn
 import prometheus_client
-import psutil
+# Conditional psutil import
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    psutil = None
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, Response
 from prometheus_client import Gauge, Counter, generate_latest, CONTENT_TYPE_LATEST
@@ -40,10 +46,13 @@ app.include_router(router)
 @app.get("/metrics", response_class=HTMLResponse)
 async def metrics(request: Request):
     """Returns metrics in HTML table format by default"""
-    # Update system metrics if enabled
+    # Update system metrics if enabled and psutil available
     if config["server"].get("enable_system_metrics", False):
-        CPU_USAGE.set(psutil.cpu_percent())
-        MEMORY_USAGE.set(psutil.virtual_memory().percent)
+        if PSUTIL_AVAILABLE:
+            CPU_USAGE.set(psutil.cpu_percent())
+            MEMORY_USAGE.set(psutil.virtual_memory().percent)
+        else:
+            logger.warning("System metrics enabled but psutil not installed. Run 'pip install psutil' to enable CPU/memory monitoring.")
     
     # Get all metrics data
     metrics_data = generate_latest().decode('utf-8')

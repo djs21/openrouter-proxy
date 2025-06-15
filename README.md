@@ -41,13 +41,13 @@ by rotating through multiple API keys in a round-robin fashion.
    ```
 4. Edit `config.yml` to add your OpenRouter API keys and configure the server
 
-## Dependencies
+## Optional Dependencies
 
-The metrics dashboard requires:
+For system resource monitoring (CPU/Memory metrics), install psutil when needed:
 ```bash
 pip install psutil
 ```
-This package is for system resource monitoring and should be added to your virtual environment.
+This is only required if you enable `enable_system_metrics: true` in config.yml
 
 ## Configuration
 
