@@ -149,8 +149,8 @@ async def proxy_with_httpx(
     if api_key:
         req_kwargs["headers"]["Authorization"] = f"Bearer {api_key}"
 
-    # Count request tokens if POST
-    if request.method == "POST":
+    # Count request tokens if enabled and POST
+    if config["openrouter"].get("enable_token_counting", True) and request.method == "POST":
         try:
             request_body = await request.json()
             request_tokens = get_request_body_tokens(request_body)
@@ -183,14 +183,15 @@ async def proxy_with_httpx(
             await check_httpx_err(body, api_key)
             if free_only:
                 body = remove_paid_models(body)
-            # Count tokens from non-streaming response
-            try:
-                resp_data = json.loads(body)
-                if "usage" in resp_data:
-                    usage = resp_data["usage"]
-                    TOKENS_RECEIVED.inc(usage.get("completion_tokens", 0))
-            except json.JSONDecodeError:
-                pass
+            # Count tokens from non-streaming response if enabled
+            if config["openrouter"].get("enable_token_counting", True):
+                try:
+                    resp_data = json.loads(body)
+                    if "usage" in resp_data:
+                        usage = resp_data["usage"]
+                        TOKENS_RECEIVED.inc(usage.get("completion_tokens", 0))
+                except json.JSONDecodeError:
+                    pass
 
             return Response(
                 content=body,
@@ -210,8 +211,8 @@ async def proxy_with_httpx(
                 logger.error("sse_stream error: %s", err)
             finally:
                 await openrouter_resp.aclose()
-            # Extract tokens from last event and update metrics
-            if last_json:
+            # Extract tokens from last event and update metrics if enabled
+            if last_json and config["openrouter"].get("enable_token_counting", True):
                 try:
                     data = json.loads(last_json)
                     if "usage" in data:

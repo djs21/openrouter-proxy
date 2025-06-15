@@ -9,6 +9,7 @@ server:
   access_key: "your_local_access_key_here"  # Auth for proxy access
   log_level: "INFO"  # App log level (DEBUG, INFO, WARNING, ERROR)
   http_log_level: "INFO"  # HTTP logs level
+  enable_system_metrics: false  # Set true for CPU/Memory stats (requires psutil)
 
 # OpenRouter API settings
 openrouter:
@@ -38,6 +39,7 @@ openrouter:
   rate_limit_cooldown: 14400  # Seconds to disable rate-limited keys (4 hours)
   free_only: false            # Filter to free models only
   google_rate_delay: 0        # Delay for Google API quota issues (seconds)
+  enable_token_counting: true  # Set false to disable token metrics
 
 # Proxy settings for outbound connections
 requestProxy:

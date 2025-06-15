@@ -6,8 +6,14 @@ by rotating through multiple API keys in a round-robin fashion.
 ## Features
 
 - **HTTP Compliance**: Full HTTP/1.1 spec compliance with proper chunked encoding
-- **Performance Monitoring**: Response metrics via Prometheus at `/metrics`
+- **Enhanced Metrics Dashboard**: Detailed monitoring at `/metrics` showing:
+  - Token statistics (sent/received)
+  - Key status (active/in cooldown)
+  - System resource usage (CPU/Memory)
+  - All standard Prometheus metrics
+  - Raw metrics available at `/metrics/raw`
 - **Request Tracing**: Unique request IDs for end-to-end logging (X-Request-ID)
+- **Configurable Metrics**: Toggle system metrics and token counting in config
 - **Health Checks**: Extended endpoint monitoring with `/health` endpoint
 - **Key Validation**: Strict API key format enforcement ("sk-or-" prefix)
 - **Response Caching**: Built-in caching for /models endpoint with TTL control
@@ -34,6 +40,14 @@ by rotating through multiple API keys in a round-robin fashion.
    cp config.yml.example config.yml
    ```
 4. Edit `config.yml` to add your OpenRouter API keys and configure the server
+
+## Dependencies
+
+The metrics dashboard requires:
+```bash
+pip install psutil
+```
+This package is for system resource monitoring and should be added to your virtual environment.
 
 ## Configuration
 

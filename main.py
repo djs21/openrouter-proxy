@@ -40,9 +40,10 @@ app.include_router(router)
 @app.get("/metrics", response_class=HTMLResponse)
 async def metrics(request: Request):
     """Returns metrics in HTML table format by default"""
-    # Update system metrics
-    CPU_USAGE.set(psutil.cpu_percent())
-    MEMORY_USAGE.set(psutil.virtual_memory().percent)
+    # Update system metrics if enabled
+    if config["server"].get("enable_system_metrics", False):
+        CPU_USAGE.set(psutil.cpu_percent())
+        MEMORY_USAGE.set(psutil.virtual_memory().percent)
     
     # Get all metrics data
     metrics_data = generate_latest().decode('utf-8')
