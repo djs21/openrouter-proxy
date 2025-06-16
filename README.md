@@ -153,6 +153,8 @@ It also provides a health check endpoint:
 
 - `/health` - Health check endpoint that returns `{"status": "ok"}`
 
+## Why
+
 Forked from [Aculeasis openrouter-proxy](https://github.com/Aculeasis/openrouter-proxy). It is my attempt to fix :
 
 1. Conflicting HTTP Headers.
