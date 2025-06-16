@@ -45,7 +45,7 @@ async def get_async_client(request: Request) -> httpx.AsyncClient:
     return request.app.state.http_client
 
 
-async def check_httpx_err(body: str | bytes, api_key: Optional[str]):
+async def check_httpx_err(request: Request, body: str | bytes, api_key: Optional[str]):
     # too big or small for error
     if 10 > len(body) > 4000 or not api_key:
         return
@@ -207,7 +207,7 @@ async def proxy_with_httpx(
 
         if not is_stream:
             body = openrouter_resp.content
-            await check_httpx_err(body, api_key)
+            await check_httpx_err(request, body, api_key)
             if free_only:
                 body = remove_paid_models(body)
             if enable_token_counting:
@@ -246,7 +246,7 @@ async def proxy_with_httpx(
                         TOKENS_RECEIVED.inc(usage.get("completion_tokens", 0))
                 except json.JSONDecodeError:
                     pass
-            await check_httpx_err(last_json, api_key)
+            await check_httpx_err(request, last_json, api_key)
 
 
         return StreamingResponse(
