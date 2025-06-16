@@ -54,14 +54,20 @@ class KeyManager:
         """Get the next available API key using round-robin selection."""
         async with self.lock:
             now_ = datetime.now()
-            # Filter available keys, reactivating any whose cooldown has expired
+            # Filter available keys and clean up expired cooldowns
             available_keys = set()
-            for key in list(self.keys): # Iterate over a copy to allow modification of self.keys
-                if key in self.disabled_until and now_ >= self.disabled_until[key]:
-                    del self.disabled_until[key]
-                    logger.info("API key %s is now enabled again.", mask_key(key))
-                if key not in self.disabled_until:
-                    available_keys.add(key)
+            expired_keys = []
+            for key in self.keys:
+                if key in self.disabled_until:
+                    if now_ >= self.disabled_until[key]:
+                        expired_keys.append(key)
+                    else:
+                        continue
+                available_keys.add(key)
+                
+            for key in expired_keys:
+                del self.disabled_until[key]
+                logger.info("API key %s is now enabled again.", mask_key(key))
 
             # All keys are disabled
             if not available_keys:

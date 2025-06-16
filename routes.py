@@ -13,6 +13,7 @@ from fastapi.responses import StreamingResponse, Response
 
 from config import config, logger
 from constants import MODELS_ENDPOINTS
+MODELS_ENDPOINTS_SET = set(MODELS_ENDPOINTS)
 from key_manager import KeyManager, mask_key
 from utils import verify_access_key, check_rate_limit
 from metrics import TOKENS_SENT, TOKENS_RECEIVED
@@ -141,8 +142,7 @@ async def proxy_with_httpx(
     is_stream: bool,
 ) -> Response:
     """Core logic to proxy requests."""
-    free_only = (any(f"/api/v1{path}" == ep for ep in MODELS_ENDPOINTS) and
-                 config["openrouter"]["free_only"])
+    free_only = (f"/api/v1{path}" in MODELS_ENDPOINTS_SET and config["openrouter"]["free_only"])
     req_kwargs = {
         "method": request.method,
         "url": f"{config['openrouter']['base_url']}{path}",
