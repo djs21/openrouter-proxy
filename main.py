@@ -192,7 +192,31 @@ async def add_process_time(request: Request, call_next):
     return response
 
 # Entry point
+import multiprocessing
+import subprocess
+import time
+
 if __name__ == "__main__":
+    kms_config = config["kms"]
+    kms_host = kms_config["host"]
+    kms_port = kms_config["port"]
+    
+    # Start KMS in a separate process
+    kms_process = multiprocessing.Process(
+        target=uvicorn.run,
+        kwargs={
+            "app": "key_management_service:app",
+            "host": kms_host,
+            "port": kms_port,
+            "log_level": config["server"]["log_level"].lower()
+        }
+    )
+    kms_process.start()
+    
+    # Wait for KMS to start
+    time.sleep(2)
+    logger.info("Started Key Management Service at http://%s:%s", kms_host, kms_port)
+
     host = config["server"]["host"]
     port = config["server"]["port"]
 

@@ -191,10 +191,3 @@ async def metrics_endpoint():
 
 CONTENT_TYPE_LATEST = 'text/plain; version=0.0.4; charset=utf-8'
 
-if __name__ == "__main__":
-    kms_config = config.get("kms", {})
-    host = kms_config.get("host", "0.0.0.0")
-    port = kms_config.get("port", 5556)
-    
-    logger.warning("Starting Key Management Service on %s:%s", host, port)
-    uvicorn.run(app, host=host, port=port, server_header=False)
