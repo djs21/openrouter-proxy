@@ -44,9 +44,11 @@ by rotating through multiple API keys in a round-robin fashion.
 ## Optional Dependencies
 
 For system resource monitoring (CPU/Memory metrics), install psutil when needed:
+
 ```bash
 pip install psutil
 ```
+
 This is only required if you enable `enable_system_metrics: true` in config.yml
 
 ## Configuration
@@ -150,3 +152,27 @@ The proxy supports all OpenRouter API v1 endpoints through the following endpoin
 It also provides a health check endpoint:
 
 - `/health` - Health check endpoint that returns `{"status": "ok"}`
+
+Forked from [Aculeasis openrouter-proxy](https://github.com/Aculeasis/openrouter-proxy). It is my attempt to fix :
+
+1. Conflicting HTTP Headers
+   The proxy is sending mutually exclusive headers simultaneously:
+   http
+
+```
+   Transfer-Encoding: chunked
+   Content-Length: 407769
+```
+
+This violates HTTP/1.1 specification (RFC 7230 Section 3.3.3) which prohibits sending both headers together.
+
+2. Duplicate Headers
+   Invalid duplicate headers appear in the response:
+   http
+
+```
+   date: Fri, 13 Jun 2025 01:42:55 GMT
+   date: Fri, 13 Jun 2025 01:42:56 GMT  # Duplicate!
+   server: uvicorn
+   server: cloudflare  # Duplicate!
+```
