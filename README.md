@@ -8,6 +8,7 @@ by rotating through multiple API keys in a round-robin fashion.
 - **HTTP Compliance**: Full HTTP/1.1 spec compliance with proper chunked encoding
 - **Enhanced Metrics Dashboard**: Detailed monitoring at `/metrics` showing:
   - Token statistics (sent/received)
+  - Model endpoint caching status
   - Key status (active/in cooldown)
   - System resource usage (CPU/Memory)
   - All standard Prometheus metrics
@@ -15,7 +16,7 @@ by rotating through multiple API keys in a round-robin fashion.
 - **Request Tracing**: Unique request IDs for end-to-end logging (X-Request-ID)
 - **Configurable Metrics**: Toggle system metrics and token counting in config
 - **Health Checks**: Extended endpoint monitoring with `/health` endpoint
-- **Key Validation**: Strict API key format enforcement ("sk-or-" prefix)
+- **Key Validation**: Strict API key format enforcement ("sk-or-" prefix, invalid keys rejected at startup)
 - **Response Caching**: Built-in caching for /models endpoint with TTL control
 - **Streaming Support**: Optimized streaming responses with HTTP/1.1 compliance
 - **Environment Support**: API keys can be set via OPENROUTER_KEYS environment variable

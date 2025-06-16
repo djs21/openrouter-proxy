@@ -10,6 +10,7 @@ server:
   log_level: "INFO"  # App log level (DEBUG, INFO, WARNING, ERROR)
   http_log_level: "INFO"  # HTTP logs level
   enable_system_metrics: false  # Set true for CPU/Memory stats (requires psutil)
+  enable_system_metrics: false  # Set true for CPU/Memory stats (requires psutil)
 
 # OpenRouter API settings
 openrouter:
