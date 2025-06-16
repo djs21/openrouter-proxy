@@ -217,7 +217,7 @@ async def proxy_with_httpx(
             finally:
                 await openrouter_resp.aclose()
             # Extract tokens from last event and update metrics if enabled
-            if last_json and config["openrouter"].get("enable_token_counting", True):
+            if last_json and enable_token_counting:
                 try:
                     data = json.loads(last_json)
                     if "usage" in data:
