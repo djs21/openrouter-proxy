@@ -174,3 +174,5 @@ This violates HTTP/1.1 specification (RFC 7230 Section 3.3.3) which prohibits se
    server: uvicorn
    server: cloudflare  # Duplicate!
 ```
+
+Thus making it unusable in Big-AGI [big-AGI](https://github.com/enricoros/big-AGI).
