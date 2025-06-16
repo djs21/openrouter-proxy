@@ -207,5 +207,6 @@ if __name__ == "__main__":
         host=host, 
         port=port, 
         log_config=log_config,
-        timeout_graceful_shutdown=30
+        timeout_graceful_shutdown=30,
+        server_header=False
     )
