@@ -52,47 +52,44 @@ class KeyManager:
 
     async def get_next_key(self) -> str:
         """Get the next available API key using round-robin selection."""
-        available_keys = []
         async with self.lock:
             now_ = datetime.now()
-            for key in self.keys:
-                # Check if the key is disabled
-                if key in self.disabled_until:
-                    if now_ >= self.disabled_until[key]:
-                        # Key cooldown period has expired
-                        del self.disabled_until[key]
-                        logger.info("API key %s is now enabled again.", mask_key(key))
-                        available_keys.append(key)
-                else:
-                    # Key is not disabled
-                    available_keys.append(key)
+            # Filter available keys, reactivating any whose cooldown has expired
+            available_keys = set()
+            for key in list(self.keys): # Iterate over a copy to allow modification of self.keys
+                if key in self.disabled_until and now_ >= self.disabled_until[key]:
+                    del self.disabled_until[key]
+                    logger.info("API key %s is now enabled again.", mask_key(key))
+                if key not in self.disabled_until:
+                    available_keys.add(key)
 
             # All keys are disabled
             if not available_keys:
                 soonest_available = min(self.disabled_until.values())
                 wait_seconds = (soonest_available - now_).total_seconds()
                 logger.error(
-                    "All API keys are currently disabled. The next key will be available in %.2f seconds.", wait_seconds
+                    "All API keys are currently disabled. The next key will be available in %.2f seconds.", 
+                    wait_seconds,
                 )
                 raise HTTPException(
                     status_code=503,
                     detail="All API keys are currently disabled due to rate limits. Please try again later."
                 )
 
-            available_keys_set = set(available_keys)
-            if self.use_last_key and self.last_key in available_keys_set:
+            if self.use_last_key and self.last_key in available_keys:
                 selected_key = self.last_key
             elif self.strategy == "round-robin":
-                for _ in self.keys:
+                # Iterating over all keys to maintain round-robin order
+                for _ in range(len(self.keys)):
                     key = self.keys[self.current_index]
                     self.current_index = (self.current_index + 1) % len(self.keys)
-                    if key in available_keys_set:
+                    if key in available_keys:
                         selected_key = key
                         break
             elif self.strategy == "first":
-                selected_key = available_keys[0]
+                selected_key = next(iter(available_keys)) # Get the first element from the set
             elif self.strategy == "random":
-                selected_key = random.choice(available_keys)
+                selected_key = random.choice(list(available_keys))
             else:
                 raise RuntimeError(f"Unknown key selection strategy: {self.strategy}")
             self.last_key = selected_key

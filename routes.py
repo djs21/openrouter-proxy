@@ -56,21 +56,23 @@ async def check_httpx_err(body: str | bytes, api_key: Optional[str]):
 
 
 def remove_paid_models(body: bytes) -> bytes:
-    # {'prompt': '0', 'completion': '0', 'request': '0', 'image': '0', 'web_search': '0', 'internal_reasoning': '0'}
-    prices = ['prompt', 'completion', 'request', 'image', 'web_search', 'internal_reasoning']
+    """Removes models that have non-zero pricing if free_only is enabled."""
+    PRICES_TO_CHECK = ['prompt', 'completion', 'request', 'image', 'web_search', 'internal_reasoning']
     try:
         data = json.loads(body)
     except (json.JSONDecodeError, ValueError) as e:
-        logger.warning("Error models deserialize: %s", str(e))
-    else:
-        if isinstance(data.get("data"), list):
-            clear_data = []
-            for model in data["data"]:
-                if all(model.get("pricing", {}).get(k, "1") == "0" for k in prices):
-                    clear_data.append(model)
-            if clear_data:
-                data["data"] = clear_data
-                body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        logger.warning("Error deserializing models data: %s", str(e))
+        return body
+
+    if isinstance(data.get("data"), list):
+        filtered_data = [
+            model for model in data["data"]
+            if all(model.get("pricing", {}).get(k, "1") == "0" for k in PRICES_TO_CHECK)
+        ]
+        if filtered_data:
+            data["data"] = filtered_data
+            return json.dumps(data, ensure_ascii=False).encode("utf-8")
+    
     return body
 
 
@@ -123,11 +125,12 @@ def get_request_body_tokens(request_body: dict) -> int:
     tokens = request_body.get("max_tokens", 0)
     messages = request_body.get("messages", [])
     for message in messages:
-        content = message.get("content", "")
-        if isinstance(content, str):
-            tokens += len(content) // 4  # Rough token estimate
-        elif isinstance(content, list):
-            tokens += sum(len(item.get("text", "")) // 4 for item in content if item.get("type") == "text")
+        if content := message.get("content"):
+            if isinstance(content, str):
+                tokens += len(content) // 4  # Rough token estimate
+            elif isinstance(content, list):
+                tokens += sum(len(item["text"]) // 4 for item in content
+                            if item.get("type") == "text" and "text" in item)
     return tokens
 
 
@@ -150,10 +153,12 @@ async def proxy_with_httpx(
     if api_key:
         req_kwargs["headers"]["Authorization"] = f"Bearer {api_key}"
 
+    enable_token_counting = config["openrouter"].get("enable_token_counting", True)
     # Count request tokens if enabled and POST
-    if config["openrouter"].get("enable_token_counting", True) and request.method == "POST":
+    if enable_token_counting and request.method == "POST":
         try:
-            request_body = await request.json()
+            request_body_bytes = req_kwargs["content"]
+            request_body = json.loads(request_body_bytes)
             request_tokens = get_request_body_tokens(request_body)
             if request_tokens > 0:
                 TOKENS_SENT.inc(request_tokens)
@@ -184,8 +189,7 @@ async def proxy_with_httpx(
             await check_httpx_err(body, api_key)
             if free_only:
                 body = remove_paid_models(body)
-            # Count tokens from non-streaming response if enabled
-            if config["openrouter"].get("enable_token_counting", True):
+            if enable_token_counting:
                 try:
                     resp_data = json.loads(body)
                     if "usage" in resp_data:
