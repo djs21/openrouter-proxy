@@ -47,8 +47,26 @@ async def metrics(request: Request):
         else:
             logger.warning("System metrics enabled but psutil not installed. Run 'pip install psutil' to enable CPU/memory monitoring.")
     
-    # Get all metrics data
+    # Get local Prometheus metrics
     metrics_data = generate_latest().decode('utf-8')
+    
+    # Fetch KMS metrics
+    kms_active = "N/A"
+    kms_cooldown = "N/A"
+    
+    try:
+        kms_resp = await request.app.state.kms_client.get("/metrics")
+        kms_resp.raise_for_status()
+        kms_metrics = kms_resp.text
+        
+        # Parse metrics from raw text
+        for line in kms_metrics.splitlines():
+            if line.startswith("kms_active_keys "):
+                kms_active = line.split(" ")[1]
+            elif line.startswith("kms_cooldown_keys "):
+                kms_cooldown = line.split(" ")[1]
+    except Exception as e:
+        logger.error("Failed to fetch KMS metrics: %s", str(e))
     
     # HTML template
     html = f"""
@@ -99,11 +117,11 @@ async def metrics(request: Request):
         </div>
         
         <div class="section">
-            <h2>API Keys</h2>
+            <h2>API Keys (KMS)</h2>
             <table class="metrics-table">
                 <tr><th>Metric</th><th>Value</th></tr>
-                <tr><td>Active Keys</td><td class="metric-value">{ACTIVE_KEYS._value.get()}</td></tr>
-                <tr><td>Keys in Cooldown</td><td class="metric-value">{COOLDOWN_KEYS._value.get()}</td></tr>
+                <tr><td>Active Keys</td><td class="metric-value">{kms_active}</td></tr>
+                <tr><td>Keys in Cooldown</td><td class="metric-value">{kms_cooldown}</td></tr>
             </table>
         </div>
         
