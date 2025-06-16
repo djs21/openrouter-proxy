@@ -46,3 +46,9 @@ openrouter:
 requestProxy:
   enabled: false    # Enable outgoing proxy
   url: "socks5://user:pass@proxy.com:1080"  # Proxy URL with creds
+
+# Key Management Service (KMS) settings
+kms:
+  url: "http://localhost:5556"  # URL for proxy to communicate with KMS
+  host: "0.0.0.0"               # KMS bind host
+  port: 5556                    # KMS bind port

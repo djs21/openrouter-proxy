@@ -13,6 +13,14 @@ from fastapi import Header, HTTPException
 from config import config, logger
 from constants import RATE_LIMIT_ERROR_CODE
 
+def mask_key(key: str) -> str:
+    """Mask an API key for logging purposes."""
+    if not key:
+        return key
+    if len(key) <= 8:
+        return "****"
+    return key[:4] + "****" + key[-4:]
+
 
 def get_local_ip() -> str:
     """Get local IP address for displaying in logs."""

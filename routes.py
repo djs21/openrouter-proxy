@@ -14,20 +14,13 @@ from fastapi.responses import StreamingResponse, Response
 from config import config, logger
 from constants import MODELS_ENDPOINTS
 MODELS_ENDPOINTS_SET = set(MODELS_ENDPOINTS)
-from key_manager import KeyManager, mask_key
+from utils import mask_key
 from utils import verify_access_key, check_rate_limit
 from metrics import TOKENS_SENT, TOKENS_RECEIVED
 
 # Create router
 router = APIRouter()
 
-# Initialize key manager
-key_manager = KeyManager(
-    keys=config["openrouter"]["keys"],
-    cooldown_seconds=config["openrouter"]["rate_limit_cooldown"],
-    strategy=config["openrouter"]["key_selection_strategy"],
-    opts=config["openrouter"]["key_selection_opts"],
-)
 
 
 @asynccontextmanager
@@ -39,6 +32,11 @@ async def lifespan(app_: FastAPI):
         client_kwargs["proxy"] = proxy_url
         logger.info("Using proxy for httpx client: %s", proxy_url)
     app_.state.http_client = httpx.AsyncClient(**client_kwargs)
+    
+    # Initialize KMS client
+    kms_url = config["kms"].get("url", "http://localhost:5556")
+    app_.state.kms_client = httpx.AsyncClient(base_url=kms_url, timeout=10.0)
+    logger.info("Initialized KMS client at %s", kms_url)
     yield
     await app_.state.http_client.aclose()
 
@@ -53,7 +51,13 @@ async def check_httpx_err(body: str | bytes, api_key: Optional[str]):
         return
     has_rate_limit_error, reset_time_ms = await check_rate_limit(body)
     if has_rate_limit_error:
-        await key_manager.disable_key(api_key, reset_time_ms)
+        try:
+            await request.app.state.kms_client.post(
+                "/disable_key", 
+                json={"key": api_key, "reset_time_ms": reset_time_ms}
+            )
+        except Exception as e:
+            logger.error("Failed to disable key in KMS: %s", str(e))
 
 
 def remove_paid_models(body: bytes) -> bytes:
@@ -101,8 +105,25 @@ async def proxy_endpoint(
     # Log the full request URL including query parameters
     full_url = str(request.url).replace(str(request.base_url), "/")
 
-    # Get API key to use
-    api_key = "" if is_public else await key_manager.get_next_key()
+    # Get API key from KMS
+    api_key = ""
+    if not is_public:
+        try:
+            resp = await request.app.state.kms_client.get("/get_next_key")
+            resp.raise_for_status()
+            api_key = resp.json()["key"]
+        except httpx.HTTPStatusError as e:
+            logger.error("KMS error: %s - %s", e.response.status_code, e.response.text)
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail=f"Key Management Service error: {e.response.text}" if e.response.text else "Key Management Service unavailable"
+            )
+        except httpx.RequestError as e:
+            logger.error("KMS connection error: %s", str(e))
+            raise HTTPException(
+                status_code=503,
+                detail="Key Management Service unavailable"
+            )
 
     logger.info("Proxying request to %s (Public: %s, key: %s)", full_url, is_public, mask_key(api_key))
 
