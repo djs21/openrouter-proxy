@@ -275,8 +275,17 @@ async def health_check(request: Request):
     """Extended health check with dependency verification."""
     health_status = {"status": "ok", "request_id": request.state.request_id}
     
+    # Check KMS health
     try:
-        # Verify upstream API connectivity
+        kms_resp = await request.app.state.kms_client.get("/health")
+        health_status["kms_status"] = "up" if kms_resp.status_code < 500 else "down"
+    except Exception as e:
+        health_status["kms_status"] = "down"
+        health_status["kms_error"] = str(e)
+        logger.error("KMS health check failed", extra={"error": str(e)})
+
+    # Check upstream (OpenRouter) health
+    try:
         client = request.app.state.http_client
         health_resp = await client.head(f"{config['openrouter']['base_url']}/health")
         health_status["openrouter_status"] = "up" if health_resp.status_code < 500 else "down"
