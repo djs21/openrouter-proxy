@@ -156,8 +156,7 @@ It also provides a health check endpoint:
 Forked from [Aculeasis openrouter-proxy](https://github.com/Aculeasis/openrouter-proxy). It is my attempt to fix :
 
 1. Conflicting HTTP Headers
-   The proxy is sending mutually exclusive headers simultaneously:
-   http
+   The http proxy is sending mutually exclusive headers simultaneously:
 
 ```
    Transfer-Encoding: chunked
@@ -167,8 +166,7 @@ Forked from [Aculeasis openrouter-proxy](https://github.com/Aculeasis/openrouter
 This violates HTTP/1.1 specification (RFC 7230 Section 3.3.3) which prohibits sending both headers together.
 
 2. Duplicate Headers
-   Invalid duplicate headers appear in the response:
-   http
+   Invalid duplicate headers appear in the http response:
 
 ```
    date: Fri, 13 Jun 2025 01:42:55 GMT
