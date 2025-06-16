@@ -78,8 +78,9 @@ def prepare_forward_headers(request: Request) -> dict:
     return {
         k: v
         for k, v in request.headers.items()
-        if k.lower()
-           not in ["host", "content-length", "connection", "authorization"]
+        if k.lower() not in [
+            "host", "content-length", "connection", "authorization", "date"
+        ]
     }
 
 

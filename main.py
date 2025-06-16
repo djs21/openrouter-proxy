@@ -175,6 +175,10 @@ async def add_process_time(request: Request, call_next):
     process_time = time.time() - start_time
     response.headers["X-Process-Time"] = str(process_time)
     
+    # Remove duplicate headers that might be added by downstream
+    if "date" in response.headers:
+        del response.headers["date"]
+    
     logger.info(
         "Request completed",
         extra={
