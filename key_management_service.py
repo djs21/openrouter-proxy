@@ -142,9 +142,11 @@ class DisableKeyRequest(BaseModel):
     key: str
     reset_time_ms: Optional[int] = None
 
-# Prometheus metrics for KMS
-ACTIVE_KEYS = prometheus_client.Gauge('kms_active_keys', 'Number of active API keys in KMS')
-COOLDOWN_KEYS = prometheus_client.Gauge('kms_cooldown_keys', 'Number of keys in cooldown in KMS')
+# Import Prometheus constants
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+
+# Import metrics from shared metrics.py
+from metrics import ACTIVE_KEYS, COOLDOWN_KEYS
 
 @app.on_event("startup")
 async def startup_event():
@@ -185,9 +187,7 @@ async def metrics_endpoint():
     if key_manager:
         key_manager.update_metrics()
     return Response(
-        content=prometheus_client.generate_latest(),
+        content=generate_latest(),
         media_type=CONTENT_TYPE_LATEST
     )
-
-CONTENT_TYPE_LATEST = 'text/plain; version=0.0.4; charset=utf-8'
 

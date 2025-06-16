@@ -39,7 +39,6 @@ class RequestProxyConfig(BaseModel):
     url: Optional[str] = None
 
 class KmsConfig(BaseModel):
-    url: str = "http://localhost:5556"
     host: str = "0.0.0.0"
     port: int = 5556
 
