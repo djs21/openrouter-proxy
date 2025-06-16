@@ -10,7 +10,6 @@ server:
   log_level: "INFO"  # App log level (DEBUG, INFO, WARNING, ERROR)
   http_log_level: "INFO"  # HTTP logs level
   enable_system_metrics: false  # Set true for CPU/Memory stats (requires psutil)
-  enable_system_metrics: false  # Set true for CPU/Memory stats (requires psutil)
 
 # OpenRouter API settings
 openrouter:
@@ -49,6 +48,9 @@ requestProxy:
 
 # Key Management Service (KMS) settings
 kms:
-  url: "http://localhost:5556"  # URL for proxy to communicate with KMS
-  host: "0.0.0.0"               # KMS bind host
-  port: 5556                    # KMS bind port
+  # URL where the Key Management Service (KMS) is running.
+  # This is the address the main proxy (API Gateway) will use to communicate with KMS.
+  url: "http://localhost:5556"
+  # Host and port for the KMS service itself to bind to.
+  host: "0.0.0.0"
+  port: 5556

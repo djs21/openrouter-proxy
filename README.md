@@ -99,13 +99,22 @@ requestProxy:
 
 ### Running Manually
 
-Start the server:
+To run the OpenRouter Proxy, you now need to start two separate services:
 
-```
-python main.py
-```
+1.  **Key Management Service (KMS)**:
+    This service manages API keys and rate limits.
+    ```bash
+    python key_management_service.py
+    ```
+    It will typically run on `http://localhost:5556` (configurable in `config.yml`).
 
-The proxy will be available at `http://localhost:5555/api/v1` (or the host/port configured in your config file).
+2.  **OpenRouter API Gateway**:
+    This is the main proxy endpoint that clients connect to.
+    ```bash
+    python main.py
+    ```
+    The API Gateway will be available at `http://localhost:5555/api/v1` (or the host/port configured in your config file).
+    It communicates with the KMS internally.
 
 ### Installing as a Systemd Service
 
