@@ -182,6 +182,6 @@ This violates HTTP/1.1 specification (RFC 7230 Section 3.3.3) which prohibits se
    server: cloudflare  # Duplicate!
 ```
 
-Thus making it unusable in Big-AGI [big-AGI](https://github.com/enricoros/big-AGI).
+Thus making it unusable in [big-AGI](https://github.com/enricoros/big-AGI).
 
 3. Additionally, a proof of concept demonstrating how an AI coding companion (like Aider in my case) can assist someone like me, with zero knowledge of Python programming to fix issues they previously deemed impossible without extensive learning.
